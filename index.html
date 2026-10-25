@@ -57,6 +57,7 @@ nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--
 .cover .t{font-family:var(--display);font-size:15px;line-height:1.2;text-shadow:0 1px 8px rgba(0,0,0,.4)}
 .acard:hover .cover{transform:translateY(-3px)}
 .cover{transition:transform .2s}
+.aname{font-family:var(--body);font-weight:600;font-size:15px;line-height:1.3;color:var(--ink);text-wrap:balance;margin-bottom:-4px}
 .ameta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--muted)}
 .bar{height:3px;background:var(--line);border-radius:2px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--signal)}
@@ -394,7 +395,7 @@ let state={v:"albums",album:null,filter:"all",q:"",qi:0,score:0,answered:false};
 function renderAlbums(){
   if(state.album){return renderAlbum(ALBUMS.find(a=>a.id===state.album))}
   view.innerHTML=`<div class="toolbar" style="justify-content:space-between"><h2 style="font-size:22px">Studio albums</h2><span class="hint">Select an album for tracklist and stories</span></div>
-  <div class="grid">${ALBUMS.map(a=>{const k=knownIn(a);return `<button class="acard" data-a="${a.id}" id="ac-${a.id}">${cover(a)}<div class="ameta"><span>UK #${a.uk}</span><span>${k}/${a.tracks.length} known</span></div><div class="bar"><i style="width:${k/a.tracks.length*100}%"></i></div></button>`}).join("")}</div>
+  <div class="grid">${ALBUMS.map(a=>{const k=knownIn(a);return `<button class="acard" data-a="${a.id}" id="ac-${a.id}">${cover(a)}<span class="aname">${esc(a.title)}</span><div class="ameta"><span>UK #${a.uk}</span><span>${k}/${a.tracks.length} known</span></div><div class="bar"><i style="width:${k/a.tracks.length*100}%"></i></div></button>`}).join("")}</div>
   <section style="margin-top:48px"><h2>Live albums, EPs and extras</h2><div class="tablewrap"><table><thead><tr><th>Year</th><th>Release</th><th>What it is</th></tr></thead><tbody>${OTHER.map(o=>`<tr><td class="y">${o[0]}</td><td>${esc(o[1])}</td><td class="note">${esc(o[2])}</td></tr>`).join("")}</tbody></table></div></section>`;
   view.querySelectorAll(".acard").forEach(b=>{
     b.onclick=()=>{state.album=b.dataset.a;render();window.scrollTo({top:0})};

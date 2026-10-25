@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Muse Atlas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a mission-control archive. Hero reads the 1977 "6EQUJ5" signal printout; tabs switch between albums, singles, band, trivia and a quiz. */
+:root{
+  /* Single committed theme built on the user's 9-colour sunset palette */
+  --bg:#00202e; --surface:#003f5c; --raised:#2c4875; --ink:#ffd380; --muted:#af9e7c; --line:#2c4875;
+  --plum:#8a508f; --magenta:#bc5090; --coral:#ff6361; --orange:#ff8531; --gold:#ffa600;
+  --signal:#ff8531; --signal-soft:rgba(188,80,144,.22); --ok:#ffa600;
+  --display:"Michroma","Eurostile","Arial Black",sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1080px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;letter-spacing:.02em;margin:0}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+/* hero */
+.hero{padding-block:40px 28px;display:grid;grid-template-columns:1fr auto;gap:28px;align-items:end}
+.hero h1{font-size:clamp(34px,7vw,64px);line-height:1.05}
+.hero p{max-width:58ch;color:var(--muted);margin:14px 0 0}
+.printout{font-family:var(--mono);font-size:15px;line-height:1.25;border:1px solid var(--line);background:var(--surface);padding:12px 16px;border-radius:4px;text-align:center}
+.printout .col span{display:block;color:var(--muted)}
+.printout .col span.hit{color:var(--signal);font-weight:500}
+.printout .ring{border:2px solid var(--signal);border-radius:50%;padding:6px 4px;margin:2px 0}
+.printout small{display:block;margin-top:8px;font-size:11px;color:var(--muted);letter-spacing:.08em}
+.printout .col{display:inline-block}
+@media (max-width:640px){.hero{grid-template-columns:1fr}.printout{justify-self:start}}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-bottom:28px}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;max-width:1080px;margin:0 auto}
+.tabs button{background:none;border:0;padding:14px 14px 12px;cursor:pointer;font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--signal)}
+.progress-pill{margin-left:auto;align-self:center;font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap;padding-left:12px}
+
+/* albums grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:18px}
+.acard{background:none;border:0;padding:0;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:10px}
+.cover{aspect-ratio:1;max-width:100%;border-radius:3px;position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:12px;color:#fff}
+.cover .n{position:absolute;top:10px;left:12px;font-family:var(--mono);font-size:12px;opacity:.8}
+.cover .t{font-family:var(--display);font-size:15px;line-height:1.2;text-shadow:0 1px 8px rgba(0,0,0,.4)}
+.acard:hover .cover{transform:translateY(-3px)}
+.cover{transition:transform .2s}
+.ameta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.bar{height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--signal)}
+
+/* album detail */
+.detail{display:grid;grid-template-columns:280px 1fr;gap:36px}
+.detail>*{min-width:0}
+@media (max-width:760px){.detail{grid-template-columns:1fr}}
+.back{background:none;border:1px solid var(--line);border-radius:20px;padding:6px 14px;cursor:pointer;font-family:var(--mono);font-size:12px;margin-bottom:20px}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;margin-top:18px}
+.facts dt{font-family:var(--mono);font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding-top:2px}
+.facts dd{margin:0}
+.detail h2{font-size:clamp(24px,4vw,36px)}
+.lede{color:var(--muted);max-width:62ch}
+ol.tracks{list-style:none;padding:0;margin:20px 0;border-top:1px solid var(--line)}
+.yt{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);color:var(--signal);text-decoration:none;flex:none}
+.yt:hover{background:var(--signal-soft);border-color:var(--signal)}
+td .yt{vertical-align:middle;margin-left:8px;width:22px;height:22px}
+ol.tracks li{display:grid;grid-template-columns:2.2em 1fr auto auto;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding:9px 0}
+.tn{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tt{min-width:0}
+.tt small{display:block;color:var(--muted);font-size:13px}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:3px;background:var(--signal-soft);color:var(--signal);margin-left:6px;vertical-align:2px}
+.know{appearance:none;width:22px;height:22px;border:1.5px solid var(--line);border-radius:50%;cursor:pointer;display:grid;place-items:center;margin:0}
+.know:checked{background:var(--ok);border-color:var(--ok)}
+.know:checked::after{content:"";width:5px;height:10px;border:solid var(--surface);border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.notes{display:grid;gap:10px;padding:0;list-style:none}
+.notes li{padding-left:18px;position:relative;max-width:68ch}
+.notes li::before{content:"";position:absolute;left:0;top:.6em;width:7px;height:7px;background:var(--signal);border-radius:50%}
+.hint{font-size:13px;color:var(--muted)}
+.coverlink{display:inline-block;margin-top:18px;font-family:var(--mono);font-size:13px;color:var(--signal);text-decoration:none;border:1px solid var(--signal);border-radius:20px;padding:6px 14px}
+.coverlink:hover{background:var(--signal-soft)}
+.coverbtns{display:flex;gap:8px;flex-wrap:wrap}
+.coverlink{cursor:pointer;background:none;margin-top:0}
+.coverlink.ghost{border-color:var(--line);color:var(--muted)}
+.coverbtns{margin-top:18px}
+.cover.img .t,.cover.img .n{display:none}
+.cover.drop{outline:3px dashed var(--signal);outline-offset:3px}
+
+/* singles */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;align-items:center}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:13px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.search{flex:1 1 200px;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:7px 14px;font:inherit;color:var(--ink)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:400;border-bottom:1px solid var(--ink);padding:8px 10px 8px 0}
+td{border-bottom:1px solid var(--line);padding:10px 10px 10px 0;vertical-align:top}
+td.y{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+td .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px}
+td.note{color:var(--muted);min-width:220px}
+
+/* band */
+.members{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin:22px 0 40px}
+.member{border-top:3px solid var(--ink);padding-top:14px}
+.member h3{font-size:18px;margin:6px 0 10px}
+.photo{aspect-ratio:1;max-width:100%;border-radius:3px;background:linear-gradient(160deg,var(--surface),var(--line)) center/cover no-repeat;display:grid;place-items:center;border:1px solid var(--line)}
+.photo.has{background-size:cover;background-position:center}
+.photo span{font-family:var(--display);font-size:34px;color:var(--muted)}
+.photo.drop{outline:3px dashed var(--signal);outline-offset:3px}
+.member p{margin:0 0 8px;font-size:14px}
+.timeline{list-style:none;padding:0;margin:20px 0;border-left:1px solid var(--line)}
+.timeline li{display:grid;grid-template-columns:4.5em 1fr;gap:14px;padding:0 0 18px 18px;position:relative}
+.timeline li::before{content:"";position:absolute;left:-5px;top:6px;width:9px;height:9px;border-radius:50%;background:var(--surface);border:2px solid var(--signal)}
+.timeline b{font-family:var(--mono);font-weight:500;color:var(--signal);font-variant-numeric:tabular-nums}
+.timeline span{max-width:64ch}
+section h2{font-size:22px;margin-bottom:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:36px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.two>*{min-width:0}
+
+/* trivia */
+.trivia{columns:2 320px;column-gap:28px}
+.fact{break-inside:avoid;margin:0 0 22px;padding-top:12px;border-top:1px solid var(--line)}
+.fact .k{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--signal)}
+.fact p{margin:6px 0 0}
+
+/* quiz */
+.quiz{max-width:640px}
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.qcard h3{font-family:var(--body);font-weight:600;font-size:19px;letter-spacing:0;margin:8px 0 16px}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:4px;padding:11px 14px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--ink)}
+.opt.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,var(--surface))}
+.opt.wrong{border-color:var(--signal);background:var(--signal-soft)}
+.opt:disabled{cursor:default}
+.explain{margin-top:14px;font-size:14px;color:var(--muted)}
+.qfoot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:12px;flex-wrap:wrap}
+.btn{background:var(--ink);color:var(--bg);border:0;border-radius:20px;padding:9px 18px;cursor:pointer;font-family:var(--mono);font-size:13px}
+footer{margin:60px 0 30px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+
+/* palette accents */
+.hero h1{background:linear-gradient(90deg,var(--ink) 0%,var(--gold) 35%,var(--coral) 70%,var(--magenta) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+nav{border-bottom:0;box-shadow:0 1px 0 var(--line)}
+nav::after{content:"";display:block;height:2px;background:linear-gradient(90deg,var(--raised),var(--plum),var(--magenta),var(--coral),var(--orange),var(--gold),var(--ink))}
+.tabs button[aria-selected="true"]{color:var(--gold);border-color:var(--coral)}
+.printout{background:var(--surface);border-color:var(--raised)}
+.printout .ring{border-color:var(--coral)}
+.printout .col span.hit{color:var(--gold)}
+.bar{background:var(--raised)}
+.bar i{background:linear-gradient(90deg,var(--magenta),var(--coral),var(--gold))}
+.tag{background:rgba(255,99,97,.16);color:var(--coral)}
+.know{border-color:var(--plum)}
+.know:checked::after{border-color:var(--bg)}
+.notes li::before{background:var(--coral)}
+.timeline li::before{background:var(--bg);border-color:var(--gold)}
+.timeline b{color:var(--gold)}
+.member{border-top-color:var(--magenta)}
+.fact .k{color:var(--coral)}
+.fact{border-top-color:var(--raised)}
+th{border-bottom-color:var(--plum)}
+.chip{background:transparent;border-color:var(--raised);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--magenta);border-color:var(--magenta);color:#fff}
+.search{background:var(--surface);border-color:var(--raised)}
+.back{border-color:var(--raised);color:var(--ink)}
+.qcard{border-color:var(--raised)}
+.opt{background:var(--bg);border-color:var(--raised)}
+.opt:hover:not(:disabled){border-color:var(--gold)}
+.opt.right{border-color:var(--gold);background:rgba(255,166,0,.16)}
+.opt.wrong{border-color:var(--coral);background:rgba(255,99,97,.16)}
+.btn{background:linear-gradient(90deg,var(--coral),var(--orange));color:var(--bg);font-weight:500}
+.yt{border-color:var(--raised);color:var(--coral)}
+.yt:hover{background:rgba(255,99,97,.16);border-color:var(--coral)}
+.photo{background:linear-gradient(160deg,var(--surface),var(--plum)) center/cover no-repeat;border-color:var(--raised)}
+.photo span{color:var(--ink)}
+.eyebrow{color:var(--muted)}
+footer{border-top-color:var(--raised)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Teignmouth, Devon · since 1994 · 10 studio albums</div>
+      <h1>Muse Atlas</h1>
+      <p>Every studio album and track, every major single, the band's story and the stories behind the songs. Tick off songs as you get to know them and test yourself in the quiz.</p>
+    </div>
+    <div class="printout" aria-label="The 1977 Wow! signal printout, 6EQUJ5">
+      <div class="col"><span>1</span><span>1</span><span class="ring"><span class="hit">6</span><span class="hit">E</span><span class="hit">Q</span><span class="hit">U</span><span class="hit">J</span><span class="hit">5</span></span><span>1</span><span>3</span></div>
+      <small>"WOW!" · 15 AUG 1977<br>THE SIGNAL BEHIND ALBUM 10</small>
+    </div>
+  </header>
+</div>
+
+<nav>
+  <div class="tabs" role="tablist" id="tabs">
+    <button role="tab" data-v="albums" id="tab-albums">Albums</button>
+    <button role="tab" data-v="singles" id="tab-singles">Singles</button>
+    <button role="tab" data-v="band" id="tab-band">The Band</button>
+    <button role="tab" data-v="trivia" id="tab-trivia">Curiosities</button>
+    <button role="tab" data-v="quiz" id="tab-quiz">Quiz</button>
+    <span class="progress-pill" id="pill"></span>
+  </div>
+</nav>
+
+<main class="wrap" id="view"></main>
+
+<div class="wrap"><footer>Fan reference compiled October 2026. Chart facts refer to the UK Official Albums Chart. Your "songs known" ticks are saved in this browser only.</footer></div>
+
+<script>
+const ALBUMS=[
+{id:"showbiz",n:1,title:"Showbiz",year:1999,date:"7 Sep 1999",label:"Mushroom / Taste Media",prod:"John Leckie, Paul Reeve",uk:"29",c:["#2c4875","#ffd380"],
+lede:"The debut. Raw, Radiohead-and-Jeff-Buckley-shaped alt-rock from three Devon teenagers, but the piano runs and falsetto that define Muse are already there.",
+tracks:["Sunburn","Muscle Museum","Fillip","Falling Down","Cave","Showbiz","Unintended","Uno","Sober","Escape","Overdue","Hate This & I'll Love You"],
+singles:["Uno","Cave","Muscle Museum","Sunburn","Unintended"],
+notes:["Producer John Leckie had worked on Radiohead's The Bends and The Stone Roses' debut.","\"Unintended\" is one of Matt's earliest love songs and still turns up as a rare acoustic moment live.","Muse signed with the US label Maverick (co-founded by Madonna) before they had a UK deal."]},
+{id:"origin",n:2,title:"Origin of Symmetry",year:2001,date:"17 Jul 2001",label:"Mushroom / Taste Media",prod:"John Leckie, David Bottrill",uk:"3",c:["#003f5c","#ffa600"],
+lede:"The breakout. Bigger, stranger and far more ambitious: Rachmaninoff-style piano, church organ and some of the most famous riffs the band ever wrote.",
+tracks:["New Born","Bliss","Space Dementia","Hyper Music","Plug In Baby","Citizen Erased","Micro Cuts","Screenager","Darkshines","Feeling Good","Megalomania"],
+singles:["Plug In Baby","New Born","Bliss","Hyper Music","Feeling Good"],
+notes:["Maverick asked the band to remove the falsetto from some songs. Muse refused, left the label, and the album only came out in the US in 2005.","The title comes from a book by theoretical physicist Michio Kaku.","\"Feeling Good\" is a cover; the song comes from the 1964 musical The Roar of the Greasepaint and is best known in Nina Simone's version.","\"Megalomania\" was recorded using a church pipe organ in Bath.","\"Micro Cuts\" features some of Matt's highest recorded falsetto."]},
+{id:"absolution",n:3,title:"Absolution",year:2003,date:"22 Sep 2003",label:"East West / Taste Media",prod:"Rich Costey, Paul Reeve, John Cornfield",uk:"1",c:["#2c4875","#ff8531"],
+lede:"Apocalypse, faith and heartbreak. Their first UK number one, and the album that made Muse an arena band.",
+tracks:["Intro","Apocalypse Please","Time Is Running Out","Sing for Absolution","Stockholm Syndrome","Falling Away with You","Interlude","Hysteria","Blackout","Butterflies and Hurricanes","The Small Print","Endlessly","Thoughts of a Dying Atheist","Ruled by Secrecy"],
+singles:["Stockholm Syndrome","Time Is Running Out","Hysteria","Sing for Absolution","Butterflies and Hurricanes"],
+notes:["\"Hysteria\" is built on one of rock's most famous bass lines; Chris has said it is one of the hardest to play while singing backing vocals.","\"Butterflies and Hurricanes\" contains a full classical-style piano solo in the middle of a rock song.","The cover shows figures floating above a landscape, photographed by Storm Thorgerson, who also designed Pink Floyd's The Dark Side of the Moon cover.","The 2004 Glastonbury headline show, on this tour, is one of the band's legendary gigs."]},
+{id:"bhar",n:4,title:"Black Holes and Revelations",year:2006,date:"3 Jul 2006",label:"Warner / Helium-3",prod:"Rich Costey, Muse",uk:"1",c:["#8a508f","#ff6361"],
+lede:"Conspiracy, aliens and space-western. Funk, disco and Morricone sit next to arena rock, and almost every song became a live staple.",
+tracks:["Take a Bow","Starlight","Supermassive Black Hole","Map of the Problematique","Soldier's Poem","Invincible","Assassin","Exo-Politics","City of Delusion","Hoodoo","Knights of Cydonia"],
+singles:["Supermassive Black Hole","Starlight","Knights of Cydonia","Invincible","Map of the Problematique"],
+notes:["\"Supermassive Black Hole\" became world-famous through the baseball scene in the first Twilight film (2008).","\"Knights of Cydonia\" is named after the Cydonia region of Mars, home of the 'Face on Mars'. Its video is a parody of spaghetti westerns and kung-fu films.","Part of the album was recorded at Miraval in the south of France.","On this tour Muse played two nights at the new Wembley Stadium in 2007, released as the live album HAARP."]},
+{id:"resistance",n:5,title:"The Resistance",year:2009,date:"14 Sep 2009",label:"Warner / Helium-3",prod:"Muse",uk:"1",c:["#003f5c","#bc5090"],
+lede:"Orwell's 1984 meets Queen and Chopin. Self-produced at Lake Como, ending in a three-part symphony.",
+tracks:["Uprising","Resistance","Undisclosed Desires","United States of Eurasia (+Collateral Damage)","Guiding Light","Unnatural Selection","MK Ultra","I Belong to You (+Mon cœur s'ouvre à ta voix)","Exogenesis: Symphony Part 1 (Overture)","Exogenesis: Symphony Part 2 (Cross-Pollination)","Exogenesis: Symphony Part 3 (Redemption)"],
+singles:["Uprising","Undisclosed Desires","Resistance","Exogenesis: Symphony Part 1 (Overture)"],
+notes:["Won the Grammy for Best Rock Album (2011), the band's first Grammy.","\"Collateral Damage\" is an arrangement of Chopin's Nocturne in E-flat major.","\"I Belong to You\" includes an aria from Saint-Saëns' opera Samson et Dalila, sung by Matt in French.","\"Uprising\" borrows the feel of the Doctor Who theme and glam-rock stomp."]},
+{id:"2ndlaw",n:6,title:"The 2nd Law",year:2012,date:"28 Sep 2012",label:"Warner / Helium-3",prod:"Muse",uk:"1",c:["#00202e","#ff8531"],
+lede:"Thermodynamics, economics and dubstep. Their most genre-hopping record, with two songs sung by Chris.",
+tracks:["Supremacy","Madness","Panic Station","Prelude","Survival","Follow Me","Animals","Explorers","Big Freeze","Save Me","Liquid State","The 2nd Law: Unsustainable","The 2nd Law: Isolated System"],
+singles:["Survival","Madness","Follow Me","Panic Station","Supremacy"],
+notes:["\"Survival\" was the official song of the London 2012 Olympic Games.","Chris wrote and sang lead on \"Save Me\" and \"Liquid State\", drawn from his own fight with alcohol.","\"Follow Me\" opens with the heartbeat of Matt's son Bingham, recorded before he was born.","\"Isolated System\" is heard in the film World War Z (2013).","The cover is a map of the human brain's neural connections."]},
+{id:"drones",n:7,title:"Drones",year:2015,date:"8 Jun 2015",label:"Warner / Helium-3",prod:"Robert John \"Mutt\" Lange, Muse",uk:"1",c:["#2c4875","#ff6361"],
+lede:"A back-to-basics guitar concept album about a person turned into a human 'drone' who defects and rebels.",
+tracks:["Dead Inside","[Drill Sergeant]","Psycho","Mercy","Reapers","The Handler","[JFK]","Defector","Revolt","Aftermath","The Globalist","Drones"],
+singles:["Dead Inside","Psycho","Mercy","Reapers","Revolt","Aftermath"],
+notes:["Won the Grammy for Best Rock Album (2016), Muse's second.","Became Muse's first number one album in the United States.","Producer Mutt Lange is known for AC/DC's Back in Black and Def Leppard's Hysteria.","\"[JFK]\" samples John F. Kennedy's 1961 'secret societies' speech.","The closing track \"Drones\" is an a cappella piece built on a Renaissance-era Benedictus by Palestrina, with Matt layering every voice."]},
+{id:"simulation",n:8,title:"Simulation Theory",year:2018,date:"9 Nov 2018",label:"Warner / Helium-3",prod:"Rich Costey, Mike Elizondo, Shellback, Timbaland, Muse",uk:"1",c:["#8a508f","#ffd380"],
+lede:"Neon 1980s synthwave and pop production about life inside virtual reality.",
+tracks:["Algorithm","The Dark Side","Pressure","Propaganda","Break It to Me","Something Human","Thought Contagion","Get Up and Fight","Blockades","Dig Down","The Void"],
+singles:["Dig Down","Thought Contagion","Something Human","The Dark Side","Pressure"],
+notes:["The cover was painted by Kyle Lambert, the artist behind the Stranger Things posters.","The \"Pressure\" video is a Back to the Future-style school dance and features Terry Crews.","The album was recorded song by song with different producers, released over a year as singles.","A concert film, Simulation Theory, followed in 2020."]},
+{id:"wotp",n:9,title:"Will of the People",year:2022,date:"26 Aug 2022",label:"Warner / Helium-3",prod:"Muse",uk:"1",c:["#bc5090","#ffa600"],
+lede:"A deliberately eclectic 'greatest hits of new songs' about uprisings, pandemic anxiety and a world on edge.",
+tracks:["Will of the People","Compliance","Liberation","Won't Stand Down","Ghosts (How Can I Move On)","You Make Me Feel Like It's Halloween","Kill or Be Killed","Verona","Euphoria","We Are Fucking Fucked"],
+singles:["Won't Stand Down","Compliance","Will of the People","Kill or Be Killed","You Make Me Feel Like It's Halloween"],
+notes:["Matt described it as a kind of 'greatest hits' of styles, each song nodding to a different Muse era.","\"Liberation\" is a full Queen-style pastiche with stacked vocal harmonies.","\"Ghosts\" was also released as a duet with French singer Mylène Farmer.","Seventh consecutive UK number one album."]},
+{id:"wow",n:10,title:"The Wow! Signal",year:2026,date:"26 Jun 2026",label:"Warner / Helium-3",prod:"Muse, Dan Lancaster, Aleks von Korff",uk:"1",len:"45:27",c:["#00202e","#ff6361"],
+lede:"The newest album: cosmic mystery and the hope of contact with something greater, written largely in late 2025 during Matt's split from his wife. Critics called it a return to the guitar-led Origin to Black Holes era.",
+tracks:["The Dark Forest","Nightshift Superstar","Shimmering Scars","Cryogen","Be with You","Hexagons","The Sickness in You & I","Unravelling","Hush (with Ellie Goulding)","Space Debris"],
+singles:["Unravelling","Be with You","Cryogen","Hexagons","Nightshift Superstar","Hush (with Ellie Goulding)"],
+notes:["The title refers to the 72-second radio signal from the direction of Sagittarius picked up in 1977. The astronomer circled '6EQUJ5' on the printout and wrote 'Wow!' beside it.","Lead single \"Be with You\" premiered on a tablet sent about 33 km into the atmosphere with the company Sent Into Space.","Dan Lancaster (Bring Me the Horizon, Blink-182), Muse's touring keyboardist since 2022, produced eight tracks. Matt said he pushed the self-confessed 'control freaks' toward a fresher sound.","Ellie Goulding was working in the same studio; Matt says her part on \"Hush\" took about an hour and a half.","Became Muse's eighth consecutive UK number one album, the first group ever to debut at number one with eight albums in a row.","Matt's children sing backing vocals on \"Nightshift Superstar\"."]}
+];
+
+const OTHER=[
+["1998","Muse EP / Muscle Museum EP","Early indie EPs on Sawmills' Dangerous label, 999 copies each"],
+["2002","Hullabaloo Soundtrack","Live at Le Zénith, Paris, plus a disc of B-sides; includes the single Dead Star / In Your World"],
+["2004","Absolution Tour (DVD)","Glastonbury 2004 and more"],
+["2008","HAARP","Live at Wembley Stadium, 2007"],
+["2010","Neutron Star Collision (Love Is Forever)","Standalone single for The Twilight Saga: Eclipse"],
+["2013","Live at Rome Olympic Stadium","The 2nd Law tour, filmed in 4K"],
+["2018","Drones World Tour","360-degree in-the-round show with flying drones"],
+["2020","Simulation Theory (film)","Concert film with a sci-fi story around it"],
+["2025","Unravelling (Ghost Town Version)","Acoustic reworking of the comeback single"]
+];
+
+const SINGLE_DATES={"Uno":1999,"Cave":1999,"Muscle Museum":2000,"Sunburn":2000,"Unintended":2000,"Plug In Baby":2001,"New Born":2001,"Bliss":2001,"Hyper Music":2001,"Feeling Good":2001,"Stockholm Syndrome":2003,"Time Is Running Out":2003,"Hysteria":2003,"Sing for Absolution":2004,"Butterflies and Hurricanes":2004,"Supermassive Black Hole":2006,"Starlight":2006,"Knights of Cydonia":2006,"Invincible":2007,"Map of the Problematique":2007,"Uprising":2009,"Undisclosed Desires":2009,"Resistance":2010,"Exogenesis: Symphony Part 1 (Overture)":2010,"Survival":2012,"Madness":2012,"Follow Me":2012,"Panic Station":2013,"Supremacy":2013,"Dead Inside":2015,"Psycho":2015,"Mercy":2015,"Reapers":2015,"Revolt":2016,"Aftermath":2016,"Dig Down":2017,"Thought Contagion":2018,"Something Human":2018,"The Dark Side":2018,"Pressure":2018,"Won't Stand Down":2022,"Compliance":2022,"Will of the People":2022,"Kill or Be Killed":2022,"You Make Me Feel Like It's Halloween":2022,"Unravelling":2025,"Be with You":2026,"Cryogen":2026,"Hexagons":2026,"Nightshift Superstar":2026,"Hush (with Ellie Goulding)":2026};
+const SINGLE_NOTES={"Uno":"First single from a proper label; reached only no. 73 in the UK","Muscle Museum":"Re-released in 2000 and climbed into the UK top 25","Plug In Baby":"The riff that made them; first UK top 20 hit","Feeling Good":"Double A-side with Hyper Music","Hyper Music":"Double A-side with Feeling Good","Stockholm Syndrome":"Released first as a download-only teaser","Time Is Running Out":"First UK top 10 single","Hysteria":"Famous bass riff; video stars Justin Long","Supermassive Black Hole":"Their biggest UK hit, no. 4; Twilight soundtrack","Starlight":"Their most-streamed sing-along, written about missing home while touring","Knights of Cydonia":"Spaghetti-western video, 'Guitar Hero III' favourite","Uprising":"Glam stomp inspired by the Doctor Who theme","Survival":"Official song of the London 2012 Olympics","Madness":"Built on Chris's bass played through a KAOSS pad","Panic Station":"Funk nod to Prince and Queen","Psycho":"Riff the band had played live for years before recording it","Dig Down":"First taste of the 80s synth era","Pressure":"School-dance video with Terry Crews","Won't Stand Down":"Heaviest lead single in years","You Make Me Feel Like It's Halloween":"Halloween release, Bach-style organ intro","Unravelling":"Comeback after three years; produced by Dan Lancaster","Be with You":"Premiered from the edge of space","Cryogen":"Old-school space rock, debuted live at Brixton","Nightshift Superstar":"Disco-rock, Matt's kids on backing vocals","Hush (with Ellie Goulding)":"Released as a single on album day"};
+
+const MEMBERS=[
+{name:"Matt Bellamy",role:"Lead vocals · guitar · piano · keys",born:"9 June 1978, Cambridge",text:["Main songwriter. Known for falsetto, classical piano runs and custom Manson guitars with built-in effects and touch pads.","Son of George Bellamy, rhythm guitarist of The Tornados, whose \"Telstar\" (1962) was the first US number one by a British band.","Runs the side project The Jaded Hearts Club, a covers band of Beatles and Motown songs."]},
+{name:"Chris Wolstenholme",role:"Bass · backing vocals · keys",born:"2 December 1978, Rotherham",text:["Started as a drummer, then switched to bass to join Matt and Dom.","Writes and sings lead on occasion (\"Save Me\", \"Liquid State\").","His backing vocals and distorted, fuzzed bass tone are a huge part of the Muse sound."]},
+{name:"Dominic Howard",role:"Drums · percussion",born:"7 December 1977, Stockport",text:["Moved to Teignmouth as a child and met Matt at school; the two formed the first version of the band.","Known for flashy suits, sequins and LED outfits on stage.","Drives the dance-rock grooves of songs like \"Supermassive Black Hole\" and \"Panic Station\"."]}
+];
+
+const TIMELINE=[
+["1994","Matt, Dom and Chris form a band in Teignmouth, Devon, after earlier school groups (Gothic Plague, Fixed Penalty, Rocket Baby Dolls)."],
+["1994","As Rocket Baby Dolls they win a local battle of the bands, famously smashing their gear at the end. They soon rename themselves Muse."],
+["1998","Signed by Dennis Smith of Sawmills studio; first EPs and a US deal with Maverick."],
+["1999","Debut album Showbiz."],
+["2001","Origin of Symmetry breaks them in the UK and Europe."],
+["2003","Absolution: first UK number one."],
+["2004","Headline Glastonbury for the first time."],
+["2006","Black Holes and Revelations; \"Supermassive Black Hole\" goes global."],
+["2007","Two sold-out nights at the new Wembley Stadium."],
+["2009","Support U2 on the 360° tour; release The Resistance."],
+["2011","First Grammy, Best Rock Album for The Resistance."],
+["2012","\"Survival\" becomes the London Olympics song; The 2nd Law."],
+["2015","Drones: second Grammy and first US number one album."],
+["2016","Third Glastonbury headline."],
+["2018","Simulation Theory and its neon stage show."],
+["2022","Will of the People; Dan Lancaster joins the live band."],
+["2025","Comeback single \"Unravelling\"; European festival headline run."],
+["2026","The Wow! Signal (June) becomes their eighth UK number one in a row; North American and European arena tours follow."]
+];
+
+const TRIVIA=[
+["The name","The band has said the name came from a local idea that a 'muse' hovered over Teignmouth, since so many people there formed bands. It also fit on a poster."],
+["Guinness record","Matt holds the Guinness World Record for most guitars smashed on a single tour: 140, on the Absolution tour in 2004."],
+["Rock royalty","Matt's father played in The Tornados, whose \"Telstar\" was the first US number one by a British band, years before The Beatles."],
+["The Manson guitars","Matt's signature guitars, built by Hugh Manson in Devon, include models with a built-in KAOSS pad that lets him bend sounds by sliding a finger on a touch screen."],
+["Rachmaninoff","\"Space Dementia\" and \"Butterflies and Hurricanes\" lean heavily on Rachmaninoff's piano concertos, one of Matt's biggest influences."],
+["Chopin and Saint-Saëns","The Resistance quotes Chopin's Nocturne in E-flat and an aria from Saint-Saëns' opera Samson et Dalila."],
+["Twilight effect","Stephenie Meyer thanked Muse in the Twilight books for inspiring her; the band then appeared on three Twilight soundtracks."],
+["Banned falsetto","Their first US label wanted Matt to sing with less falsetto on Origin of Symmetry. The band walked away instead."],
+["The Edge cameo","At Glastonbury 2010, U2's The Edge joined Muse to play \"Where the Streets Have No Name\"."],
+["Tragic night","Dom's father Bill died of a heart attack shortly after watching the band's triumphant 2004 Glastonbury set."],
+["Olympic anthem","\"Survival\" was picked as the official song of the London 2012 Olympics and played during the medal ceremonies."],
+["Drones stage","The Drones tour used a 360° stage in the middle of arenas with flying drone balloons and projection curtains."],
+["Space launch","The Wow! Signal was announced by streaming its first video from a tablet floating about 33 km above Earth."],
+["6EQUJ5","The cover concept and title of album 10 come from the 1977 Big Ear telescope printout, where each character records signal strength; 'U' was over 30 times background noise."],
+["Helium-3","The band's own imprint is named after a rare isotope found on the Moon, touted as a future fusion fuel."],
+["Eight in a row","Muse are the first group, and second act ever, to debut at number one in the UK with eight consecutive albums (Absolution through The Wow! Signal)."],
+["Guitar Hero","\"Knights of Cydonia\" in Guitar Hero III introduced Muse to a whole generation of gamers."],
+["Live reputation","Muse have won best live act at the Brit Awards and the NME Awards multiple times; their shows are known for lasers, giant robots and confetti."],
+["Teenage gear","\"Hate This & I'll Love You\" and \"Muscle Museum\" date back to the band's teenage demo years in Devon."],
+["Mars connection","Cydonia (Knights of Cydonia) is the region of Mars where the Viking 1 orbiter photographed the so-called 'Face on Mars' in 1976."]
+];
+
+const QUIZ=[
+["In which town did Muse form?",["Exeter","Teignmouth","Bristol","Plymouth"],1,"Teignmouth, a seaside town in Devon, in 1994."],
+["Which album was Muse's first UK number one?",["Origin of Symmetry","Showbiz","Absolution","Black Holes and Revelations"],2,"Absolution (2003) started a run that now stands at eight number ones in a row."],
+["Which song was the official song of the London 2012 Olympics?",["Uprising","Survival","Madness","Starlight"],1,"\"Survival\", from The 2nd Law."],
+["What did Matt Bellamy's father play in?",["The Shadows","The Tornados","The Kinks","The Zombies"],1,"George Bellamy was rhythm guitarist in The Tornados (\"Telstar\")."],
+["Which Muse album won their first Grammy?",["Drones","Black Holes and Revelations","The Resistance","The 2nd Law"],2,"The Resistance won Best Rock Album in 2011; Drones won the same award in 2016."],
+["\"Feeling Good\" on Origin of Symmetry is...",["An original Muse song","A cover of a musical number made famous by Nina Simone","A Queen cover","A Chris Wolstenholme solo track"],1,"It comes from the 1964 musical The Roar of the Greasepaint."],
+["Who sings lead on \"Save Me\"?",["Matt","Dom","Chris","Ellie Goulding"],2,"Chris wrote and sang \"Save Me\" and \"Liquid State\"."],
+["What does the code 6EQUJ5 refer to?",["A Muse fan-club code","The 1977 Wow! signal printout","A Manson guitar model","A track on Drones"],1,"It is the signal-strength sequence circled by the astronomer who wrote 'Wow!' beside it."],
+["Which song became famous through the Twilight baseball scene?",["Supermassive Black Hole","Starlight","Uprising","Hysteria"],0,"Supermassive Black Hole, in Twilight (2008)."],
+["Who produced Drones?",["Rich Costey","Mutt Lange","John Leckie","Dan Lancaster"],1,"Robert John \"Mutt\" Lange, known for AC/DC and Def Leppard."],
+["Which artist duets on \"Hush\" from The Wow! Signal?",["Florence Welch","Ellie Goulding","Dua Lipa","Mylène Farmer"],1,"Ellie Goulding was in the same studio and recorded it in an afternoon."],
+["Cydonia, from \"Knights of Cydonia\", is a region on...",["The Moon","Mars","Venus","Europa"],1,"It's the Martian region with the famous 'Face on Mars'."],
+["How many guitars did Matt smash on the 2004 tour, setting a world record?",["40","88","140","200"],2,"140 guitars, a Guinness World Record."],
+["What was the closing track on Drones built on?",["A Bach fugue","A Palestrina Benedictus","A Chopin nocturne","A Gregorian chant"],1,"An a cappella setting based on Palestrina."]
+];
+
+let covers={};
+try{covers=JSON.parse(localStorage.getItem("muse-covers")||"{}")||{}}catch(e){covers={}}
+function saveCovers(){try{localStorage.setItem("muse-covers",JSON.stringify(covers));return true}catch(e){return false}}
+function loadCover(file,id,done){
+  const img=new Image(),url=URL.createObjectURL(file);
+  img.onload=()=>{const s=480,c=document.createElement("canvas");c.width=c.height=s;
+    const m=Math.min(img.width,img.height);c.getContext("2d").drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,s,s);
+    URL.revokeObjectURL(url);covers[id]=c.toDataURL("image/jpeg",0.85);done(saveCovers())};
+  img.onerror=()=>{URL.revokeObjectURL(url);done(false,"That file isn't an image. Try a JPG or PNG.")};
+  img.src=url;
+}
+const yt=t=>"https://www.youtube.com/results?search_query="+encodeURIComponent("Muse "+t.replace(/[\[\]]/g,""));
+const ytBtn=t=>`<a class="yt" href="${yt(t)}" target="_blank" rel="noopener" aria-label="Listen to ${esc(t)} on YouTube" title="Listen on YouTube"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></a>`;
+const ALBUM_OF={};ALBUMS.forEach(a=>a.tracks.forEach(t=>ALBUM_OF[t]=a));
+const totalTracks=ALBUMS.reduce((s,a)=>s+a.tracks.length,0);
+
+let known={};
+try{known=JSON.parse(localStorage.getItem("muse-known")||"{}")||{}}catch(e){known={}}
+function save(){try{localStorage.setItem("muse-known",JSON.stringify(known))}catch(e){}}
+const key=(a,t)=>a.id+"::"+t;
+const knownIn=a=>a.tracks.filter(t=>known[key(a,t)]).length;
+function updatePill(){const n=ALBUMS.reduce((s,a)=>s+knownIn(a),0);document.getElementById("pill").textContent=n+" / "+totalTracks+" songs known"}
+
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const cover=(a,big)=>covers[a.id]?`<div class="cover img" style="background:center/cover no-repeat url('${covers[a.id]}')" role="img" aria-label="${esc(a.title)} cover"><span class="n">${a.year}</span><span class="t">${esc(a.title)}</span></div>`:`<div class="cover" style="background:radial-gradient(circle at 75% 25%, ${a.c[1]} 0 ${big?14:12}%, transparent ${big?15:13}%), radial-gradient(120% 90% at 20% 110%, ${a.c[1]}66, transparent 60%), linear-gradient(160deg, ${a.c[0]}, #00202e)"><span class="n">${String(a.n).padStart(2,"0")} · ${a.year}</span><span class="t">${esc(a.title)}</span></div>`;
+
+const view=document.getElementById("view");
+let state={v:"albums",album:null,filter:"all",q:"",qi:0,score:0,answered:false};
+
+function renderAlbums(){
+  if(state.album){return renderAlbum(ALBUMS.find(a=>a.id===state.album))}
+  view.innerHTML=`<div class="toolbar" style="justify-content:space-between"><h2 style="font-size:22px">Studio albums</h2><span class="hint">Select an album for tracklist and stories</span></div>
+  <div class="grid">${ALBUMS.map(a=>{const k=knownIn(a);return `<button class="acard" data-a="${a.id}" id="ac-${a.id}">${cover(a)}<div class="ameta"><span>UK #${a.uk}</span><span>${k}/${a.tracks.length} known</span></div><div class="bar"><i style="width:${k/a.tracks.length*100}%"></i></div></button>`}).join("")}</div>
+  <section style="margin-top:48px"><h2>Live albums, EPs and extras</h2><div class="tablewrap"><table><thead><tr><th>Year</th><th>Release</th><th>What it is</th></tr></thead><tbody>${OTHER.map(o=>`<tr><td class="y">${o[0]}</td><td>${esc(o[1])}</td><td class="note">${esc(o[2])}</td></tr>`).join("")}</tbody></table></div></section>`;
+  view.querySelectorAll(".acard").forEach(b=>{
+    b.onclick=()=>{state.album=b.dataset.a;render();window.scrollTo({top:0})};
+    const cv=b.querySelector(".cover");
+    b.ondragover=e=>{e.preventDefault();cv.classList.add("drop")};
+    b.ondragleave=()=>cv.classList.remove("drop");
+    b.ondrop=e=>{e.preventDefault();cv.classList.remove("drop");const f=e.dataTransfer.files[0];if(f)loadCover(f,b.dataset.a,(ok,err)=>{if(!err)render()})};
+  });
+}
+
+function renderAlbum(a){
+  view.innerHTML=`<button class="back" id="back">← All albums</button>
+  <div class="detail"><div>${cover(a,true)}
+    <dl class="facts"><dt>Released</dt><dd>${a.date}</dd><dt>Producer</dt><dd>${esc(a.prod)}</dd><dt>Label</dt><dd>${esc(a.label)}</dd><dt>UK peak</dt><dd>No. ${a.uk}</dd><dt>Tracks</dt><dd>${a.tracks.length}${a.len?" · "+a.len:""}</dd></dl>  </div><div>
+    <div class="eyebrow">Studio album ${a.n} of ${ALBUMS.length}</div>
+    <h2 style="margin:8px 0 12px">${esc(a.title)}</h2>
+    <p class="lede">${esc(a.lede)}</p>
+    <div class="toolbar" style="margin:22px 0 0;justify-content:space-between"><span class="eyebrow">Tracklist</span><span class="hint" id="kc">${knownIn(a)}/${a.tracks.length} known · tick a song once you know it</span></div>
+    <ol class="tracks">${a.tracks.map((t,i)=>`<li><span class="tn">${String(i+1).padStart(2,"0")}</span><span class="tt">${esc(t)}${a.singles.includes(t)?'<span class="tag">Single</span>':""}</span>${ytBtn(t)}<input type="checkbox" class="know" id="k-${a.id}-${i}" data-t="${esc(t)}" aria-label="I know ${esc(t)}" ${known[key(a,t)]?"checked":""}></li>`).join("")}</ol>
+    <h3 style="font-size:16px;margin:30px 0 14px">Stories behind the album</h3>
+    <ul class="notes">${a.notes.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>
+    <div class="toolbar" style="margin-top:30px">${a.n>1?`<button class="chip" data-go="${ALBUMS[a.n-2].id}">← ${esc(ALBUMS[a.n-2].title)}</button>`:""}${a.n<ALBUMS.length?`<button class="chip" data-go="${ALBUMS[a.n].id}">${esc(ALBUMS[a.n].title)} →</button>`:""}</div>
+  </div></div>`;
+  document.getElementById("back").onclick=()=>{state.album=null;render()};
+  const msg=t=>{const m=document.getElementById("cmsg");if(m)m.textContent=t};
+  const take=f=>{if(!f)return;loadCover(f,a.id,(ok,err)=>{if(err){msg(err);return}render();if(!ok)msg("Cover shown, but this browser couldn't save it. It will disappear on reload.")})};
+  const cv=view.querySelector(".detail .cover");
+  cv.ondragover=e=>{e.preventDefault();cv.classList.add("drop")};
+  cv.ondragleave=()=>cv.classList.remove("drop");
+  cv.ondrop=e=>{e.preventDefault();cv.classList.remove("drop");take(e.dataTransfer.files[0])};
+  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{state.album=b.dataset.go;render();window.scrollTo({top:0})});
+  view.querySelectorAll(".know").forEach(c=>c.onchange=()=>{const k=key(a,c.dataset.t);if(c.checked)known[k]=1;else delete known[k];save();updatePill();document.getElementById("kc").textContent=knownIn(a)+"/"+a.tracks.length+" known · tick a song once you know it"});
+}
+
+function renderSingles(){
+  const rows=[];ALBUMS.forEach(a=>a.singles.forEach(s=>rows.push({s,a,y:SINGLE_DATES[s]||a.year,note:SINGLE_NOTES[s]||""})));
+  rows.push({s:"Dead Star / In Your World",a:null,y:2002,note:"Non-album single, later on Hullabaloo"});
+  rows.push({s:"Neutron Star Collision (Love Is Forever)",a:null,y:2010,note:"Twilight Saga: Eclipse soundtrack"});
+  rows.sort((x,y)=>x.y-y.y);
+  const q=state.q.toLowerCase();
+  const shown=rows.filter(r=>(state.filter==="all"||(r.a?r.a.id:"none")===state.filter)&&(!q||r.s.toLowerCase().includes(q)));
+  view.innerHTML=`<div class="toolbar" style="justify-content:space-between"><h2 style="font-size:22px">Singles</h2><span class="hint">${rows.length} major singles, 1999–2026</span></div>
+  <div class="toolbar"><input class="search" id="sq" placeholder="Search singles" value="${esc(state.q)}"><button class="chip" data-f="all" aria-pressed="${state.filter==="all"}">All</button>${ALBUMS.map(a=>`<button class="chip" data-f="${a.id}" aria-pressed="${state.filter===a.id}">${esc(a.title)}</button>`).join("")}<button class="chip" data-f="none" aria-pressed="${state.filter==="none"}">Non-album</button></div>
+  <div class="tablewrap"><table><thead><tr><th>Year</th><th>Single</th><th>Album</th><th>Why it matters</th></tr></thead><tbody>
+  ${shown.map(r=>`<tr><td class="y">${r.y}</td><td style="white-space:nowrap"><b style="font-weight:500;white-space:normal">${esc(r.s)}</b>${ytBtn(r.s.replace(" / "," "))}</td><td>${r.a?`<span class="sw" style="background:${r.a.c[1]}"></span>${esc(r.a.title)}`:'<span class="hint">Standalone</span>'}</td><td class="note">${esc(r.note)}</td></tr>`).join("")||'<tr><td colspan="4" class="hint">No singles match that search.</td></tr>'}
+  </tbody></table></div>`;
+  view.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{state.filter=b.dataset.f;render()});
+  const sq=document.getElementById("sq");sq.oninput=()=>{state.q=sq.value;const p=sq.selectionStart;render();const n=document.getElementById("sq");n.focus();n.setSelectionRange(p,p)};
+}
+
+function renderBand(){
+  view.innerHTML=`<h2 style="font-size:22px">The band</h2>
+  <p class="lede">An English rock trio from Devon with the same line-up since 1994. Muse have sold over 30 million albums, won two Grammys, two Brits and a pile of NME and Q awards, and are widely rated one of the best live bands in the world. Live, they are joined by Dan Lancaster on keys and guitar.</p>
+  <div class="members">${MEMBERS.map((m,i)=>{const id="m-"+i,ph=covers[id];return `<div class="member"><div class="photo${ph?" has":""}" id="ph-${i}" data-i="${i}" style="${ph?`background-image:url('${ph}')`:""}">${ph?"":`<span>${m.name.split(" ").map(w=>w[0]).join("")}</span>`}</div>
+    <div class="eyebrow" style="margin-top:14px">${esc(m.role)}</div><h3>${esc(m.name)}</h3><p class="hint">Born ${esc(m.born)}</p>${m.text.map(t=>`<p>${esc(t)}</p>`).join("")}</div>`}).join("")}</div>
+  <div class="two"><section><h2>Timeline</h2><ol class="timeline">${TIMELINE.map(t=>`<li><b>${t[0]}</b><span>${esc(t[1])}</span></li>`).join("")}</ol></section>
+  <section><h2>The Muse sound</h2><ul class="notes" style="margin-top:20px">
+    <li>Classical piano (Rachmaninoff, Chopin, Liszt) collides with heavy riffs and falsetto.</li>
+    <li>Big influences: Queen, Radiohead, Jeff Buckley, Rage Against the Machine, Nirvana, Ennio Morricone and Prince.</li>
+    <li>Recurring themes: government control, conspiracy, revolution, space and science, love under pressure.</li>
+    <li>Chris's fuzz bass often carries the riff, freeing Matt to play piano or lead lines.</li>
+    <li>Every era gets its own sound: alt-rock (1999–2001), arena rock (2003–06), symphonic (2009), electronic (2012), guitar concept rock (2015), synthwave (2018), eclectic (2022), space rock (2026).</li>
+  </ul>
+  <h2 style="margin-top:32px">Starter listening path</h2><ol class="notes" style="margin-top:14px">
+    <li>Start with the hits: Plug In Baby, Hysteria, Supermassive Black Hole, Starlight, Knights of Cydonia, Uprising.</li>
+    <li>Then the fan-favourite deep cuts: Citizen Erased, Butterflies and Hurricanes, Stockholm Syndrome, Map of the Problematique, Exogenesis.</li>
+    <li>Listen to Absolution and Black Holes and Revelations front to back.</li>
+    <li>Finish with The Wow! Signal to hear where the band is now.</li>
+  </ol></section></div>`;
+  const take=(f,i)=>{if(f)loadCover(f,"m-"+i,(ok,err)=>{if(!err)render()})};
+  view.querySelectorAll('input[type=file][data-i]').forEach(inp=>inp.onchange=()=>take(inp.files[0],inp.dataset.i));
+  view.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{delete covers["m-"+b.dataset.rm];saveCovers();render()});
+  view.querySelectorAll(".photo").forEach(p=>{
+    p.ondragover=e=>{e.preventDefault();p.classList.add("drop")};
+    p.ondragleave=()=>p.classList.remove("drop");
+    p.ondrop=e=>{e.preventDefault();p.classList.remove("drop");take(e.dataTransfer.files[0],p.dataset.i)};
+  });
+}
+
+function renderTrivia(){
+  view.innerHTML=`<div class="toolbar" style="justify-content:space-between"><h2 style="font-size:22px">Curiosities</h2><span class="hint">${TRIVIA.length} facts</span></div>
+  <div class="trivia">${TRIVIA.map(t=>`<div class="fact"><div class="k">${esc(t[0])}</div><p>${esc(t[1])}</p></div>`).join("")}</div>`;
+}
+
+function renderQuiz(){
+  if(state.qi>=QUIZ.length){
+    const pct=Math.round(state.score/QUIZ.length*100);
+    view.innerHTML=`<div class="quiz"><div class="qcard"><div class="eyebrow">Result</div><h3>${state.score} of ${QUIZ.length} correct</h3><p>${pct>=85?"Expert level. You could headline a Muse pub quiz.":pct>=60?"Solid fan. A couple more albums front to back and you're there.":"Good start. Read the album stories and try again."}</p><div class="qfoot"><span></span><button class="btn" id="again">Play again</button></div></div></div>`;
+    document.getElementById("again").onclick=()=>{state.qi=0;state.score=0;state.answered=false;render()};return;
+  }
+  const [q,opts,ans,why]=QUIZ[state.qi];
+  view.innerHTML=`<div class="quiz"><div class="qcard"><div class="eyebrow">Question ${state.qi+1} of ${QUIZ.length} · score ${state.score}</div><h3>${esc(q)}</h3>
+  <div class="opts">${opts.map((o,i)=>`<button class="opt" data-i="${i}" id="opt-${i}">${esc(o)}</button>`).join("")}</div>
+  <div class="explain" id="why" hidden></div>
+  <div class="qfoot"><div class="bar" style="flex:1"><i style="width:${state.qi/QUIZ.length*100}%"></i></div><button class="btn" id="next" hidden>${state.qi+1===QUIZ.length?"See result":"Next question"}</button></div></div></div>`;
+  view.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;if(i===ans)state.score++;
+    view.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(+x.dataset.i===ans)x.classList.add("right");else if(x===b)x.classList.add("wrong")});
+    const w=document.getElementById("why");w.textContent=(i===ans?"Correct. ":"Not quite. ")+why;w.hidden=false;document.getElementById("next").hidden=false;
+  });
+  document.getElementById("next").onclick=()=>{state.qi++;render()};
+}
+
+function render(){
+  document.querySelectorAll("#tabs [role=tab]").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===state.v));
+  ({albums:renderAlbums,singles:renderSingles,band:renderBand,trivia:renderTrivia,quiz:renderQuiz})[state.v]();
+  updatePill();
+}
+document.querySelectorAll("#tabs [role=tab]").forEach(b=>b.onclick=()=>{state.v=b.dataset.v;if(b.dataset.v==="albums")state.album=null;render()});
+const h=(location.hash||"").slice(1);
+if(["albums","singles","band","trivia","quiz"].includes(h))state.v=h;
+else if(ALBUMS.some(a=>a.id===h)){state.v="albums";state.album=h}
+render();
+</script>
+
+</body>
+</html>
